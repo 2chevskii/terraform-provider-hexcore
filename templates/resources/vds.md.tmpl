@@ -1,0 +1,84 @@
+---
+page_title: "hexcore_vds Resource - HexCore"
+description: |-
+  Manage a standard or custom HexCore VDS.
+---
+
+# hexcore_vds (Resource)
+
+{{ .Description }}
+
+## Example Usage
+
+{{ tffile "examples/resources/hexcore_vds/resource.tf" }}
+
+### Custom sizing and an ephemeral creation password
+
+{{ tffile "examples/resources/hexcore_vds_custom/resource.tf" }}
+
+Custom memory is requested in GB and observed as `memory_mb` at 1024 MB/GB.
+Disk capacities are in GB; prices remain decimal strings and dates remain raw
+API text. Unavailable optional observations are null. Image and size slugs are
+creation declarations and are preserved on refresh because the SDK cannot read
+them. Name, region and computed observations refresh observable drift.
+
+All provisioning input changes, including name, region, image, size, custom size
+and password generation, replace the whole server. `password_wo` itself has no
+replacement modifier: changing a write-only value alone produces no diff.
+Increment `password_wo_version` to request replacement. No password reset is
+performed. Passwords never enter state or saved plans; use an ephemeral variable
+so the caller's variable is not saved either. When the password is omitted,
+default credential delivery is unverified: the public API does not specify it.
+
+The 45 UTF-8 byte name limit is conservative provider policy. Live HexCore
+truncated long names at 45 characters; Unicode boundary behavior is unverified.
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Timeouts, readiness and deletion
+
+Defaults: create **15m**, read **2m**, delete **20m**; polling approximately **5s**.
+They are project defaults, not vendor SLAs. SDK requests retain a 30s timeout and
+the remaining operation deadline. `timeouts` is a nested attribute, for example
+`timeouts = { create = "20m", read = "3m", delete = "25m" }`.
+
+`delete_mode` defaults to `graceful`. `force` explicitly selects a power cut.
+Changing policy/timeouts updates state without an API mutation; apply those
+changes before destroy. Shutdown is submitted once and must complete with an
+observed `halted` VDS before destroy is submitted once. Graceful shutdown never
+automatically escalates to force. An accepted action/deletion is not completion.
+Deletion waits for a successful complete account VDS list omitting the exact ID.
+A singular 403/404, failed listing or failed action-history lookup cannot prove
+absence and retains state with an error.
+
+Creation waits for the verified `Running` status, matching name, region and
+shape, and a usable assigned IPv4. An accepted ID is saved before waiting;
+timeout diagnostics retain the last available observation and ID. Inspect a
+failed creation before applying again: Terraform may replace a tainted VDS.
+If a transport/decode failure prevents obtaining an ID, completion is uncertain.
+Inspect the account/control panel, recover the actual ID and original metadata,
+then import. Do not repeat the POST or adopt a same-name object automatically.
+
+## Import
+
+Plain-ID import is rejected because the SDK cannot return the original image or
+standard size slug. Declare those values explicitly in a strict JSON identifier:
+
+{{ codefile "shell" "examples/resources/hexcore_vds/import.sh" }}
+
+For custom sizing:
+
+{{ codefile "shell" "examples/resources/hexcore_vds_custom/import.sh" }}
+
+The declared image cannot be independently verified. Matching catalog shape
+does not prove the original standard size; it only validates observable
+CPU/memory/disk. Region and shape are checked against the remote object where
+available. Unknown fields, tokens, passwords, missing metadata and malformed IDs
+are rejected. All import operations are read-only. Imports use a 2m budget and
+set local defaults (`delete_mode = "graceful"`, no timeouts or password generation).
+Optional non-secret `delete_mode`, `timeouts` (positive create/read/delete duration
+strings), and `password_wo_version` fields may declare the local settings already
+used in configuration. The examples above include them where needed for a no-op
+next plan. A password generation is a number, never a password, and importing it
+does not change guest credentials. If omitted on import, adding it to configuration
+requests replacement. Use matching configuration for a no-op next plan.
