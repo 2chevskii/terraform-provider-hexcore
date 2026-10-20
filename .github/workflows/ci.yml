@@ -107,7 +107,11 @@ jobs:
           version: v2.18.3
           args: check
       - name: Build all release archives without signing or publishing
-        run: goreleaser release --snapshot --clean --skip=sign,publish --parallelism 2
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.18.3
+          args: release --snapshot --clean --skip=sign,publish --parallelism 2
 
   policy:
     name: PR policy
