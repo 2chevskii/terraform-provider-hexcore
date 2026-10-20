@@ -33,7 +33,7 @@ navigation and local search over the same reference pages. Examples are in
 
 ## Local use before a registry release
 
-Build with Go >= 1.25.8:
+Build with Go >= 1.26.10:
 
 ```sh
 go build -o terraform-provider-hexcore .
@@ -81,10 +81,11 @@ it locally. Terraform must be on PATH for schema generation.
 
 Full offline CLI acceptance needs an installed Terraform executable on PATH or
 `TF_ACC_TERRAFORM_PATH`. Without one those cases explicitly skip. Tests never
-download Terraform and need no HexCore credentials. CI tests Go 1.25.8/Terraform
-1.11.4 and Go 1.27.2/Terraform 1.16.6, including CGO race checks, compiled-provider
+download Terraform and need no HexCore credentials. CI tests Go 1.26.10/Terraform
+1.11.4 and Go 1.27.3/Terraform 1.16.6, including CGO race checks, compiled-provider
 discovery, no-op plans after apply/import, and cleanup isolation. It also verifies
-generated docs, builds VitePress, lints workflows and builds six release archives.
+generated docs, builds VitePress, checks reachable Go vulnerabilities, lints workflows
+and builds six release archives.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) for branch and documentation conventions.
 Normal PRs target `develop`; release/hotfix promotion targets `master`.

@@ -2,7 +2,7 @@
 
 ## Toolchain
 
-- Go 1.25.8 minimum; CI also tests Go 1.27.2.
+- Go 1.26.10 minimum; CI also tests Go 1.27.3.
 - Terraform 1.11 minimum; CI covers 1.11.4 and 1.16.6.
 - Node 24.18.0, as pinned in `.node-version`.
 - GCC/Clang and CGO for Go race checks.
@@ -64,7 +64,7 @@ aggregate `CI` check and PR review-thread resolution. Solo-maintainer PRs do not
 require an additional reviewer. Direct pushes and force pushes are blocked.
 
 CI checks formatting, module consistency, build, vet, race tests, CLI acceptance,
-generated docs, the VitePress build, workflow syntax and a six-platform unsigned
+generated docs, the VitePress build, workflow syntax, reachable Go vulnerabilities and a six-platform unsigned
 GoReleaser snapshot. Actions use pinned commit SHAs and read-only permissions by
 default. The documentation site deploys from `develop` through GitHub Pages.
 

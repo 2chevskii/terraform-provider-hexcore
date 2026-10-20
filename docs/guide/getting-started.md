@@ -11,7 +11,7 @@ OpenTofu compatibility is untested.
 
 ## Build the provider
 
-Install Go 1.25.8 or newer, then:
+Install Go 1.26.10 or newer, then:
 
 ```sh
 git clone https://github.com/2chevskii/terraform-provider-hexcore.git
