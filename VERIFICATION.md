@@ -1,5 +1,9 @@
 # Implementation handoff — 2026-10-19
 
+This is the original offline milestone report. See the public repository's
+[publication guide](docs/guide/releasing.md) and [current status](docs/guide/status.md)
+for subsequent repository, CI and documentation work.
+
 The offline implementation milestone is complete. This is not a registry release
 or a claim that the provider lifecycle has been verified against live HexCore.
 No HexCore API requests, billable operations, remote creation, publication or

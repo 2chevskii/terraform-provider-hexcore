@@ -1,99 +1,115 @@
 # Terraform provider for HexCore
 
-Local implementation of `registry.terraform.io/2chevskii/hexcore`, built with
-Terraform Plugin Framework (protocol 6) and the published
+[![CI](https://github.com/2chevskii/terraform-provider-hexcore/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/2chevskii/terraform-provider-hexcore/actions/workflows/ci.yml)
+[![Documentation](https://github.com/2chevskii/terraform-provider-hexcore/actions/workflows/pages.yml/badge.svg?branch=develop)](https://2chevskii.github.io/terraform-provider-hexcore/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+A community Terraform provider for HexCore, built with Terraform Plugin Framework
+(protocol 6) and the published
 [`go-hexcore v1.0.0`](https://github.com/2chevskii/go-hexcore/releases/tag/v1.0.0).
-The registry address is a target: this provider has not been published.
+Discover catalogs and manage standard or custom VDS with explicit import metadata,
+bounded waits and state retention on uncertain API outcomes.
 
-Requires Go >= 1.25.8 for development and Terraform >= 1.11 for use. OpenTofu
-compatibility has not been tested. The current surface is four catalog data
-sources, a singular VDS data source, and a standard/custom VDS resource.
+**Status:** public source and offline acceptance coverage. No Terraform Registry
+version has been released, and the provider lifecycle has not been verified
+against live HexCore. The intended source is `registry.terraform.io/2chevskii/hexcore`.
+Requires Terraform **>= 1.11**; OpenTofu compatibility is untested.
 
-## Configuration and examples
+## Documentation
 
-Supply a raw token through `HEXCORE_TOKEN` and use `provider "hexcore" {}`.
-Explicit `token` overrides the environment; empty/unknown values do not fall
-back. `.env` files are never loaded. Use a secret manager or shell environment
-to supply credentials; do not put tokens in configuration files.
+Read the **[VitePress documentation site](https://2chevskii.github.io/terraform-provider-hexcore/)**:
 
-See [provider configuration](docs/index.md), [VDS lifecycle and import](docs/resources/vds.md),
-and [examples](examples). Example catalog slugs are placeholders: select current
-available values using the data sources. `endpoint` is an SDK base URL override
-for development and local testing. Provider construction makes no API requests.
+- [Getting started](https://2chevskii.github.io/terraform-provider-hexcore/guide/getting-started.html)
+- [VDS resource and import](docs/resources/vds.md)
+- [Configuration and catalogs](docs/guide/configuration.md)
+- [Recovery and troubleshooting](docs/guide/troubleshooting.md)
+- [Verification and limitations](docs/guide/status.md)
+- [Release process](docs/guide/releasing.md)
 
-Creation inputs require replacement. `delete_mode` and `timeouts` only update
-local state. Defaults are 15m create, 2m read, 20m delete, and 5s polling; these
-are project defaults, not vendor SLAs. Each HTTP request has the SDK's 30s bound
-and the remaining operation context. Graceful shutdown never escalates to force.
+The schema reference in `docs/` is generated with `terraform-plugin-docs` and
+retains the Terraform Registry layout. VitePress v2 adds authored guides,
+navigation and local search over the same reference pages. Examples are in
+[`examples/`](examples/); catalog slugs in examples are placeholders.
 
-The provider retains an accepted VDS ID before waiting. After an uncertain
-creation response without an ID, inspect the account manually and use structured
-import before applying again. Names are not idempotency keys. Only a successful
-complete account VDS list omitting the exact ID establishes absence; ambiguous
-403/404 responses never remove state on their own.
+## Local use before a registry release
 
-`password_wo` is a sensitive creation-only write-only argument. Supply it with
-an ephemeral Terraform variable and increment `password_wo_version` to request
-replacement. A password edit alone produces no diff. The SDK cannot retrieve
-passwords; they never belong in state. Public API documentation makes the
-creation password optional but does not specify credential delivery when omitted.
-That behavior remains unverified; do not assume email delivery. No reset-password
-operation is exposed.
-
-## Local development
+Build with Go >= 1.26.10:
 
 ```sh
 go build -o terraform-provider-hexcore .
-go test ./...
-go vet ./...
-go generate ./...
 ```
 
-On Windows, build `terraform-provider-hexcore.exe`. The CLI acceptance tests run
-automatically when Terraform is on PATH or `TF_ACC_TERRAFORM_PATH` points to its
-executable. Otherwise they explicitly skip; use the commands below to require
-the full suite. Tests do not download Terraform or use HexCore credentials.
+On Windows, use `terraform-provider-hexcore.exe`. Configure a temporary
+`dev_overrides` CLI file pointing to the binary directory and set
+`TF_CLI_CONFIG_FILE` to it, as shown in the
+[getting-started guide](docs/guide/getting-started.md). Skip `terraform init` for
+this unpublished provider; the development override supplies local discovery.
 
-```powershell
-$env:TF_ACC_TERRAFORM_PATH = (Get-Command terraform).Source
-go test ./... -count=1 -timeout 10m
-go test -race ./... -count=1 -timeout 10m # requires CGO and a supported C compiler
-```
-
-The tests use real SDK decoding against loopback HTTP stubs and protocol-6
-factories. A transport guard rejects non-loopback requests. `TF_ACC` does not
-enable live tests; no live test suite is included. See [verification and remaining
-work](VERIFICATION.md) for the exact handoff evidence.
-
-For local discovery, create a **temporary**, machine-specific CLI configuration:
+Supply a raw `HEXCORE_TOKEN` through the environment and use:
 
 ```hcl
-provider_installation {
-  dev_overrides {
-    "registry.terraform.io/2chevskii/hexcore" = "/absolute/directory/containing/binary"
+terraform {
+  required_version = ">= 1.11.0"
+  required_providers {
+    hexcore = {
+      source = "2chevskii/hexcore"
+    }
   }
-  direct {}
 }
+
+provider "hexcore" {}
 ```
 
-Point `TF_CLI_CONFIG_FILE` to it, then run `terraform providers schema -json`
-or `terraform validate` in an example directory. Development overrides bypass
-installation; do not run `terraform init` to fetch this unpublished provider.
-Do not commit the override. `go generate` uses the pinned `tfplugindocs` tool;
-put Terraform on PATH for documentation generation.
+Explicit `token` overrides the environment. Empty or unknown configured values
+never fall back. `.env` files are not loaded and Configure makes no network calls.
 
-## Scope and upstream limitations
+## Development
 
-Offline passing tests do not establish live provider compatibility. No HexCore
-requests or billable resources are authorized by the implementation task.
-The [SDK verification report](https://github.com/2chevskii/go-hexcore/blob/v1.0.0/docs/live-verification.md)
-records earlier SDK evidence, including unresolved graceful reboot/password-reset
-completion and disk attachment/resize failures. Disk deletion is undocumented;
-the provider exposes no disk lifecycle, reboot, password reset, power-state,
-networking, SSH-key, user-data, monitoring, or action resources.
+```sh
+go mod download
+go build ./...
+go vet ./...
+go test ./... -count=1 -timeout 10m
+go generate ./...
+npm ci
+npm run docs:dev
+```
 
-Publication, release signing, a GitHub remote and live spending require a later
-instruction. Future live tests must require explicit session authorization,
-budget and catalog targets, `HEXCORE_LIVE=1`, `HEXCORE_TOKEN`, and a separate
-`HEXCORE_LIVE_WRITES=1` gate for mutations. Only test-owned VDS may be cleaned up.
-No credentials or state from the sibling SDK are needed or copied.
+The docs use the exact VitePress **2.0.0-alpha.20** prerelease and Node **24.18.0**.
+Use `npm run docs:build` for a production build and `npm run docs:preview` to inspect
+it locally. Terraform must be on PATH for schema generation.
+
+Full offline CLI acceptance needs an installed Terraform executable on PATH or
+`TF_ACC_TERRAFORM_PATH`. Without one those cases explicitly skip. Tests never
+download Terraform and need no HexCore credentials. CI tests Go 1.26.10/Terraform
+1.11.4 and Go 1.27.3/Terraform 1.16.6, including CGO race checks, compiled-provider
+discovery, no-op plans after apply/import, and cleanup isolation. It also verifies
+generated docs, builds VitePress, checks reachable Go vulnerabilities, lints workflows
+and builds six release archives.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for branch and documentation conventions.
+Normal PRs target `develop`; release/hotfix promotion targets `master`.
+Both protected branches require CI and prohibit direct pushes.
+
+## Lifecycle and verification boundary
+
+Provisioning changes replace the whole VDS. Only timeout and deletion-policy
+changes update local state without an API mutation. Creation retains an accepted
+ID before waiting; uncertain writes are never blindly replayed. Only a successful
+full VDS list omitting the exact ID proves absence. A singular 403/404 does not.
+Graceful deletion never escalates to a power cut automatically.
+
+Use an ephemeral variable for `password_wo` and increment the non-secret
+`password_wo_version` to request replacement. Credential delivery when the optional
+password is omitted is undocumented and unverified. Import requires original
+image/region/size declarations because the SDK cannot read all provisioning selectors.
+
+The [SDK's dated live report](https://github.com/2chevskii/go-hexcore/blob/v1.0.0/docs/live-verification.md)
+is prior SDK evidence. Disk attachment/resize and graceful reboot/password-reset
+completion remain unresolved, and disk deletion is undocumented. Those operations
+and the other deferred features are not exposed. This repository's tests use
+loopback stubs; `TF_ACC` does not authorize live requests or spending.
+
+See [VERIFICATION.md](VERIFICATION.md) for the original offline implementation
+evidence and [SECURITY.md](SECURITY.md) for private vulnerability reporting.
+Distributed under the [MIT License](LICENSE).

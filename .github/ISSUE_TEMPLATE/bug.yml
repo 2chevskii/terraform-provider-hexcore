@@ -1,0 +1,26 @@
+name: Bug report
+description: Report provider behavior with sanitized reproduction details.
+body:
+  - type: markdown
+    attributes:
+      value: Never include tokens, passwords, Terraform state/plans, billing details or complete live responses.
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions
+      description: Provider, Terraform, operating system; Go if built locally.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Sanitized reproduction
+      description: Use synthetic names, IDs and selectors. State whether the API was a local stub or live HexCore.
+    validations:
+      required: true

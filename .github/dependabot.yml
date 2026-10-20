@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule: { interval: weekly }
+    commit-message: { prefix: 'ci(deps)' }
+  - package-ecosystem: gomod
+    directory: /
+    target-branch: develop
+    schedule: { interval: weekly }
+    commit-message: { prefix: 'build(deps)' }
+    groups:
+      terraform: { patterns: ['github.com/hashicorp/terraform-*'] }
+  - package-ecosystem: npm
+    directory: /
+    target-branch: develop
+    schedule: { interval: weekly }
+    commit-message: { prefix: 'build(deps)' }
+    groups:
+      documentation: { patterns: ['*'] }

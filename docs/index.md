@@ -8,8 +8,11 @@ description: |-
 
 Manage HexCore VDS and discover catalogs. Requires Terraform >= 1.11. Provider publication and live lifecycle verification are separate milestones.
 
-The source address is an unpublished design target. Use local development overrides
-until publication is requested. OpenTofu compatibility has not been tested.
+The public source is on [GitHub](https://github.com/2chevskii/terraform-provider-hexcore).
+The registry address is a design target; no provider version has been released.
+Use local development overrides until a signed version is available. Start with the
+[documentation guide](https://2chevskii.github.io/terraform-provider-hexcore/guide/getting-started.html).
+OpenTofu compatibility has not been tested.
 Use `HEXCORE_TOKEN` for a raw API token; `.env` files are never loaded.
 Explicit empty or unknown configured values never fall back to the environment.
 Configuration validation and client construction make no network requests.
