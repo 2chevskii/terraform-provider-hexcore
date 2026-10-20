@@ -17,3 +17,11 @@ coverage.out
 coverage.txt
 *.test
 *.test.exe
+node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+*.tsbuildinfo
+*.asc
+*.gpg
+*.key
+*.pem
