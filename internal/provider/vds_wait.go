@@ -106,9 +106,12 @@ func ready(v *hexcore.VDS, name, region string, shape vdsShape) bool {
 		return false
 	}
 	ip := net.ParseIP(*v.IPv4)
-	return ip != nil && ip.To4() != nil && !ip.IsUnspecified() && v.Name == name && v.Region != nil && *v.Region == region && v.VCPU == shape.vcpu && v.Memory == shape.memoryMB && v.Disk == shape.diskGB
+	// Get and List can both omit region. Preserve the configured selector in
+	// that case, but reject a mismatching region when the API reports one.
+	regionMatches := v.Region == nil || *v.Region == region
+	return ip != nil && ip.To4() != nil && !ip.IsUnspecified() && v.Name == name && regionMatches && v.VCPU == shape.vcpu && v.Memory == shape.memoryMB && v.Disk == shape.diskGB
 }
 
 func halted(o observation) bool {
-	return o.presence == present && o.vds.Status != nil && *o.vds.Status == "halted"
+	return o.presence == present && o.vds != nil && o.vds.Status != nil && (*o.vds.Status == "halted" || *o.vds.Status == "Halted")
 }

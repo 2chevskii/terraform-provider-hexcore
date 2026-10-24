@@ -30,8 +30,10 @@ every five seconds and observes cancellation. Independent VDS can progress in pa
 
 Creation is submitted once. The accepted resource ID enters partial state before
 readiness polling, so a wait failure can still leave a tracked, billed server.
-Completion requires the verified `Running` status, matching name, region and
-shape, and a usable IPv4 address. Never assume an accepted response means readiness.
+Completion requires the verified `Running` status, matching name and shape,
+and a usable IPv4 address. A reported region must match the configured selector.
+When both Get and List omit region, the selector is preserved without independent
+region verification. Never assume an accepted response means readiness.
 
 Changing `name`, `region`, `image`, `size`, `custom_size`, or the password generation
 replaces the entire VDS. The API has no general rename or resize operation.

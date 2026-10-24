@@ -11,8 +11,9 @@ Discover catalogs and manage standard or custom VDS with explicit import metadat
 bounded waits and state retention on uncertain API outcomes.
 
 **Status:** public source and offline acceptance coverage. No Terraform Registry
-version has been released, and the provider lifecycle has not been verified
-against live HexCore. The intended source is `registry.terraform.io/2chevskii/hexcore`.
+version has been released. The standard VDS lifecycle was verified against live
+HexCore with OpenTofu 1.12.6; custom VDS live acceptance remains pending. The
+intended source is `registry.terraform.io/2chevskii/hexcore`.
 Requires Terraform **>= 1.11**; OpenTofu **1.12.6** is covered by the offline suite.
 
 ## Documentation

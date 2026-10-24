@@ -13,7 +13,7 @@ The registry address is a design target; no provider version has been released.
 Use local development overrides until a signed version is available. Start with the
 [documentation guide](https://2chevskii.github.io/terraform-provider-hexcore/guide/getting-started.html).
 OpenTofu 1.12.6 is covered by offline acceptance tests;
-live lifecycle verification remains pending.
+the standard VDS lifecycle also has live verification. Custom VDS live acceptance remains pending.
 Use `HEXCORE_TOKEN` for a raw API token; `.env` files are never loaded.
 Explicit empty or unknown configured values never fall back to the environment.
 Configuration validation and client construction make no network requests.
@@ -44,6 +44,8 @@ provider "hexcore" {}
 
 ## Verification boundary
 
-Provider acceptance tests use local HTTP stubs. Live provider lifecycle behavior
-has not been verified. See the repository's `VERIFICATION.md` and the SDK's
-dated verification report for supported evidence and vendor blockers.
+Automated provider acceptance tests use local HTTP stubs. The standard VDS
+lifecycle was also verified against live HexCore with OpenTofu 1.12.6; custom
+VDS live acceptance remains pending. See the
+[verification report](https://2chevskii.github.io/terraform-provider-hexcore/guide/status.html)
+for the tested scope and vendor limitations.

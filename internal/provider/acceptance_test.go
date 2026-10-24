@@ -123,6 +123,20 @@ func TestOfflineAcceptanceStandard(t *testing.T) {
 	}})
 }
 
+func TestOfflineAcceptanceMissingRegion(t *testing.T) {
+	requireTerraform(t)
+	b := newStub(t)
+	b.omitRegion = true
+	config := offlineConfig(b, "tf-offline", `size = "small"`, "")
+	checkRegion := tfresource.TestCheckResourceAttr("hexcore_vds.test", "region", "test-region")
+	tfresource.UnitTest(t, tfresource.TestCase{ProtoV6ProviderFactories: offlineFactories(), CheckDestroy: assertCleanStub(b), Steps: []tfresource.TestStep{
+		{Config: config, Check: checkRegion},
+		{RefreshState: true, Check: checkRegion},
+		{ResourceName: "hexcore_vds.test", ImportState: true, ImportStateIdFunc: importID(false), ImportStateVerify: true},
+		{Config: config, PlanOnly: true, ConfigPlanChecks: tfresource.ConfigPlanChecks{PostApplyPostRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}}, Check: checkRegion},
+	}})
+}
+
 func TestOfflineAcceptanceCustom(t *testing.T) {
 	requireTerraform(t)
 	b := newStub(t)
