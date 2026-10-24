@@ -29,7 +29,7 @@ func requireTerraform(t *testing.T) {
 		return
 	}
 	if _, err := exec.LookPath("terraform"); err != nil {
-		t.Skip("offline CLI acceptance requires Terraform >= 1.11 on PATH or TF_ACC_TERRAFORM_PATH; no binary is downloaded by tests")
+		t.Skip("offline CLI acceptance requires Terraform >= 1.11 on PATH or TF_ACC_TERRAFORM_PATH pointing to Terraform or OpenTofu; no binary is downloaded by tests")
 	}
 }
 func offlineFactories() map[string]func() (tfprotov6.ProviderServer, error) {
@@ -41,7 +41,7 @@ terraform {
   required_version = ">= 1.11.0"
   required_providers {
     hexcore = {
-      source = "2chevskii/hexcore"
+      source = "registry.terraform.io/2chevskii/hexcore"
     }
   }
 }

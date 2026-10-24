@@ -21,6 +21,8 @@ go test ./... -count=1 -timeout 10m
 
 Install Terraform >= 1.11 on PATH or set `TF_ACC_TERRAFORM_PATH` for full offline
 CLI acceptance. Run `go test -race ./...` with CGO and a supported compiler.
+For OpenTofu 1.12.6, set `TF_ACC_TERRAFORM_PATH` to its executable and
+`TF_ACC_PROVIDER_HOST=registry.terraform.io`. CI covers both CLIs.
 Tests use local stubs and need no cloud credentials. Live checks and spending
 require separate, explicit authorization; do not add always-on billable tests.
 

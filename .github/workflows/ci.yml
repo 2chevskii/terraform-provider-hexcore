@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   provider:
-    name: Provider (Go ${{ matrix.go }}, Terraform ${{ matrix.terraform }})
+    name: Provider (Go ${{ matrix.go }}, ${{ matrix.cli }} ${{ matrix.version }})
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -23,9 +23,16 @@ jobs:
       matrix:
         include:
           - go: '1.26.10'
-            terraform: '1.11.4'
+            cli: terraform
+            version: '1.11.4'
           - go: '1.27.3'
-            terraform: '1.16.6'
+            cli: terraform
+            version: '1.16.6'
+          - go: '1.27.3'
+            cli: tofu
+            version: '1.12.6'
+    env:
+      IAC_CLI: ${{ matrix.cli }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -34,16 +41,22 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        if: matrix.cli == 'terraform'
         with:
-          terraform_version: ${{ matrix.terraform }}
+          terraform_version: ${{ matrix.version }}
           terraform_wrapper: false
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        if: matrix.cli == 'tofu'
+        with:
+          tofu_version: ${{ matrix.version }}
+          tofu_wrapper: false
       - name: Check formatting and modules
         run: |
           test -z "$(gofmt -l main.go generate.go internal)"
           go mod tidy
           git diff --exit-code -- go.mod go.sum
           go mod verify
-          terraform fmt -check -recursive examples
+          "$IAC_CLI" fmt -check -recursive examples
       - name: Build and vet
         run: |
           go build ./...
@@ -52,8 +65,9 @@ jobs:
         env:
           CHECKPOINT_DISABLE: '1'
           CGO_ENABLED: '1'
+          TF_ACC_PROVIDER_HOST: registry.terraform.io
         run: |
-          TF_ACC_TERRAFORM_PATH="$(command -v terraform)"
+          TF_ACC_TERRAFORM_PATH="$(command -v "$IAC_CLI")"
           export TF_ACC_TERRAFORM_PATH
           test -x "$TF_ACC_TERRAFORM_PATH"
           go test -race ./... -count=1 -timeout 10m -coverprofile coverage.out

@@ -26,6 +26,12 @@ builds the site, checks generated reference pages and tests release packaging.
 These are offline tests. CI has no HexCore credentials and does not create
 billable infrastructure.
 
+The same suite covers OpenTofu 1.12.6, including compiled-provider discovery,
+standard/custom lifecycle, write-only passwords, import and no-op plans. Provider
+configurations use the full `registry.terraform.io/2chevskii/hexcore` address so
+both CLIs select the same provider. This remains local-stub evidence, not a live
+HexCore acceptance result.
+
 ## Live boundary
 
 The [SDK's dated verification report](https://github.com/2chevskii/go-hexcore/blob/v1.0.0/docs/live-verification.md)
@@ -37,7 +43,6 @@ implementing the provider or preparing this repository for publication.
 - Creation without a password has undocumented credential delivery.
 - Custom plan bounds beyond positive quantities and image disk minimum are unpublished.
 - A singular 403/404 cannot establish resource absence.
-- OpenTofu compatibility is untested.
 
 ## Deferred API surface
 

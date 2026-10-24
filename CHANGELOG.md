@@ -8,6 +8,7 @@
 - Structured import with explicit creation metadata and non-secret local settings.
 - Write-only creation passwords with replacement generations.
 - Offline SDK contract and Terraform CLI acceptance coverage.
+- OpenTofu 1.12.6 offline acceptance and CI coverage with a fully qualified provider source address.
 - VitePress v2 documentation, CI, GitHub Pages and provider release packaging.
 - Patched gRPC, crypto and network dependencies for the advisories reported on publication.
 - Go 1.26.10 build minimum to consume patched HTTP/2 dependencies; releases use Go 1.27.3.

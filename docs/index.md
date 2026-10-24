@@ -12,7 +12,8 @@ The public source is on [GitHub](https://github.com/2chevskii/terraform-provider
 The registry address is a design target; no provider version has been released.
 Use local development overrides until a signed version is available. Start with the
 [documentation guide](https://2chevskii.github.io/terraform-provider-hexcore/guide/getting-started.html).
-OpenTofu compatibility has not been tested.
+OpenTofu 1.12.6 is covered by offline acceptance tests;
+live lifecycle verification remains pending.
 Use `HEXCORE_TOKEN` for a raw API token; `.env` files are never loaded.
 Explicit empty or unknown configured values never fall back to the environment.
 Configuration validation and client construction make no network requests.
@@ -24,7 +25,7 @@ terraform {
   required_version = ">= 1.11.0"
   required_providers {
     hexcore = {
-      source = "2chevskii/hexcore"
+      source = "registry.terraform.io/2chevskii/hexcore"
     }
   }
 }
