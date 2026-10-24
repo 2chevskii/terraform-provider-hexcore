@@ -3,8 +3,8 @@
 ## Current status
 
 The source repository is public and has CI, a VitePress v2 documentation site,
-and provider-specific release packaging. Terraform Registry enrollment and the
-first signed provider version remain pending. A live standard VDS lifecycle with
+and provider-specific release packaging. Version 1.0.0 provides signed packages
+for Linux, macOS and Windows on amd64 and arm64. A live standard VDS lifecycle with
 OpenTofu 1.12.6 passed on 24 October 2026; custom VDS live acceptance remains pending.
 
 ## Offline evidence

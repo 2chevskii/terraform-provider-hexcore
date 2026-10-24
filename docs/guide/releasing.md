@@ -1,16 +1,15 @@
 # Release process
 
-The public GitHub repository and documentation site are available before the
-first provider version. A GitHub source publication does not register the
-provider with the Terraform Registry. No provider version has been released yet.
+Provider releases contain signed packages, a protocol manifest and checksums.
+GitHub release publication and Terraform Registry registration are separate steps.
 
-## Before the first version
+## Verification and signing configuration
 
-Complete a separately authorized live provider acceptance session for the
-advertised lifecycle, including standard/custom creation, refresh, import, no-op
-plans and confirmed cleanup. Resolve or clearly scope credential delivery when
-no creation password is supplied. Record remaining limits without inferring
-provider readiness from the SDK's earlier live checks.
+Record live evidence separately from offline coverage. Version 1.0.0 has live
+standard VDS create, refresh, import, no-op plan and deletion evidence; custom
+sizing and credential delivery without an explicit password remain unverified.
+The maintainer accepted these documented limits for the first release. Further
+live acceptance needs separate authorization and confirmed cleanup.
 
 The maintainer must choose the version and configure a dedicated release signing
 key. The release key has no passphrase. Store its ASCII-armored private key as

@@ -9,8 +9,9 @@ description: |-
 Manage HexCore VDS and discover catalogs. Requires Terraform >= 1.11. Provider publication and live lifecycle verification are separate milestones.
 
 The public source is on [GitHub](https://github.com/2chevskii/terraform-provider-hexcore).
-The registry address is a design target; no provider version has been released.
-Use local development overrides until a signed version is available. Start with the
+Install the signed provider from `registry.terraform.io/2chevskii/hexcore`.
+Version 1.0.0 provides packages for Linux, macOS and Windows on amd64 and arm64.
+Start with the
 [documentation guide](https://2chevskii.github.io/terraform-provider-hexcore/guide/getting-started.html).
 OpenTofu 1.12.6 is covered by offline acceptance tests;
 the standard VDS lifecycle also has live verification. Custom VDS live acceptance remains pending.
