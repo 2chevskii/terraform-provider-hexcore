@@ -27,7 +27,7 @@ features:
 ---
 
 ::: info Release status
-The source is public; the provider has not been released to the Terraform Registry.
+Version 1.0.0 provides signed packages through Terraform Registry.
 Offline acceptance and a live standard VDS lifecycle are verified.
 Custom VDS live acceptance remains pending.
 Read the [verification boundary](./guide/status) before planning live use.
