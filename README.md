@@ -10,10 +10,10 @@ A community Terraform provider for HexCore, built with Terraform Plugin Framewor
 Discover catalogs and manage standard or custom VDS with explicit import metadata,
 bounded waits and state retention on uncertain API outcomes.
 
-**Status:** public source and offline acceptance coverage. No Terraform Registry
-version has been released. The standard VDS lifecycle was verified against live
-HexCore with OpenTofu 1.12.6; custom VDS live acceptance remains pending. The
-intended source is `registry.terraform.io/2chevskii/hexcore`.
+**Version 1.0.0:** signed packages for Linux, macOS and Windows on amd64 and arm64.
+The standard VDS lifecycle was verified against live HexCore with OpenTofu 1.12.6;
+custom VDS live acceptance remains pending. The provider source is
+`registry.terraform.io/2chevskii/hexcore`.
 Requires Terraform **>= 1.11**; OpenTofu **1.12.6** is covered by the offline suite.
 
 ## Documentation
@@ -32,19 +32,7 @@ retains the Terraform Registry layout. VitePress v2 adds authored guides,
 navigation and local search over the same reference pages. Examples are in
 [`examples/`](examples/); catalog slugs in examples are placeholders.
 
-## Local use before a registry release
-
-Build with Go >= 1.26.10:
-
-```sh
-go build -o terraform-provider-hexcore .
-```
-
-On Windows, use `terraform-provider-hexcore.exe`. Configure a temporary
-`dev_overrides` CLI file pointing to the binary directory and set
-`TF_CLI_CONFIG_FILE` to it, as shown in the
-[getting-started guide](docs/guide/getting-started.md). Skip `terraform init` for
-this unpublished provider; the development override supplies local discovery.
+## Quick start
 
 Supply a raw `HEXCORE_TOKEN` through the environment and use:
 
@@ -53,13 +41,18 @@ terraform {
   required_version = ">= 1.11.0"
   required_providers {
     hexcore = {
-      source = "registry.terraform.io/2chevskii/hexcore"
+      source  = "registry.terraform.io/2chevskii/hexcore"
+      version = "1.0.0"
     }
   }
 }
 
 provider "hexcore" {}
 ```
+
+Run `terraform init` to install the signed provider from Terraform Registry.
+Use `tofu init` with OpenTofu. For local development builds, see the
+[getting-started guide](docs/guide/getting-started.md#local-development-builds).
 
 Explicit `token` overrides the environment. Empty or unknown configured values
 never fall back. `.env` files are not loaded and Configure makes no network calls.
