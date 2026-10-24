@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  provider:
+    name: Provider (Go ${{ matrix.go }}, ${{ matrix.cli }} ${{ matrix.version }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - go: '1.26.10'
+            cli: terraform
+            version: '1.11.4'
+          - go: '1.27.3'
+            cli: terraform
+            version: '1.16.6'
+          - go: '1.27.3'
+            cli: tofu
+            version: '1.12.6'
+    env:
+      IAC_CLI: ${{ matrix.cli }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        if: matrix.cli == 'terraform'
+        with:
+          terraform_version: ${{ matrix.version }}
+          terraform_wrapper: false
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        if: matrix.cli == 'tofu'
+        with:
+          tofu_version: ${{ matrix.version }}
+          tofu_wrapper: false
+      - name: Check formatting and modules
+        run: |
+          test -z "$(gofmt -l main.go generate.go internal)"
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+          go mod verify
+          "$IAC_CLI" fmt -check -recursive examples
+      - name: Build and vet
+        run: |
+          go build ./...
+          go vet ./...
+      - name: Offline contracts, CLI acceptance and race checks
+        env:
+          CHECKPOINT_DISABLE: '1'
+          CGO_ENABLED: '1'
+          TF_ACC_PROVIDER_HOST: registry.terraform.io
+        run: |
+          TF_ACC_TERRAFORM_PATH="$(command -v "$IAC_CLI")"
+          export TF_ACC_TERRAFORM_PATH
+          test -x "$TF_ACC_TERRAFORM_PATH"
+          go test -race ./... -count=1 -timeout 10m -coverprofile coverage.out
+
+  documentation:
+    name: Documentation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.3'
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: '1.16.6'
+          terraform_wrapper: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Verify generated schema reference
+        run: |
+          go generate ./...
+          git diff --exit-code -- docs templates
+      - run: npm ci
+      - run: npm run docs:build
+
+  packaging:
+    name: Release packaging (snapshot)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.3'
+      - name: Lint workflows
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          actionlint -color
+      - name: Check reachable Go vulnerabilities
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+          govulncheck ./...
+      - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          distribution: goreleaser
+          version: v2.18.3
+          args: check
+      - name: Build all release archives without signing or publishing
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          distribution: goreleaser
+          version: v2.18.3
+          args: release --snapshot --clean --skip=sign,publish --parallelism 2
+
+  policy:
+    name: PR policy
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Validate title and target branch
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BASE: ${{ github.base_ref }}
+          PR_HEAD: ${{ github.head_ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          if ! [[ "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?\!?:\ .+ ]]; then
+            echo 'Use a Conventional Commit title, for example: docs: clarify VDS import.'
+            exit 1
+          fi
+          case "$PR_BASE" in
+            develop) ;;
+            master)
+              if [[ "$PR_HEAD_REPO" != "$GITHUB_REPOSITORY" ]] || ! [[ "$PR_HEAD" =~ ^(release/|hotfix/|develop$) ]]; then
+                echo 'Only develop, release/* or hotfix/* from this repository can target master.'
+                exit 1
+              fi
+              ;;
+            *) echo 'Pull requests must target develop, or master for release/hotfix promotion.'; exit 1 ;;
+          esac
+
+  ci:
+    name: CI
+    if: always()
+    needs: [provider, documentation, packaging, policy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require all checks
+        env:
+          PROVIDER: ${{ needs.provider.result }}
+          DOCUMENTATION: ${{ needs.documentation.result }}
+          PACKAGING: ${{ needs.packaging.result }}
+          POLICY: ${{ needs.policy.result }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          test "$PROVIDER" = success
+          test "$DOCUMENTATION" = success
+          test "$PACKAGING" = success
+          if test "$EVENT" = pull_request; then test "$POLICY" = success; fi
