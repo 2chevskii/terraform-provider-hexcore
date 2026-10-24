@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.11.0"
   required_providers {
     hexcore = {
-      source = "2chevskii/hexcore"
+      source = "registry.terraform.io/2chevskii/hexcore"
     }
   }
 }

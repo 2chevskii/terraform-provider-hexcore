@@ -135,8 +135,10 @@ Deletion waits for a successful complete account VDS list omitting the exact ID.
 A singular 403/404, failed listing or failed action-history lookup cannot prove
 absence and retains state with an error.
 
-Creation waits for the verified `Running` status, matching name, region and
-shape, and a usable assigned IPv4. An accepted ID is saved before waiting;
+Creation waits for the verified `Running` status, matching name and shape,
+and a usable assigned IPv4. A reported region must match; when Get and List
+both omit it, the configured selector is preserved without independent region
+verification. An accepted ID is saved before waiting;
 timeout diagnostics retain the last available observation and ID. Inspect a
 failed creation before applying again: Terraform may replace a tainted VDS.
 If a transport/decode failure prevents obtaining an ID, completion is uncertain.

@@ -7,7 +7,7 @@ The public source repository is available on
 [GitHub](https://github.com/2chevskii/terraform-provider-hexcore). A Terraform
 Registry version has **not** been released. Use a local build until a signed
 provider release is available. The provider requires **Terraform 1.11 or newer**.
-OpenTofu compatibility is untested.
+OpenTofu 1.12.6 is also covered by offline acceptance tests.
 
 ## Build the provider
 
@@ -47,13 +47,17 @@ terraform {
   required_version = ">= 1.11.0"
   required_providers {
     hexcore = {
-      source = "2chevskii/hexcore"
+      source = "registry.terraform.io/2chevskii/hexcore"
     }
   }
 }
 
 provider "hexcore" {}
 ```
+
+Use the full source address in both Terraform and OpenTofu. A short address
+defaults to a different registry in each CLI. For OpenTofu, use `tofu` in place
+of `terraform` in the CLI commands; local development overrides work in both.
 
 ## Discover provisioning options
 

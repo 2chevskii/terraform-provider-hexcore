@@ -4,6 +4,7 @@
 
 - Go 1.26.10 minimum; CI also tests Go 1.27.3.
 - Terraform 1.11 minimum; CI covers 1.11.4 and 1.16.6.
+- OpenTofu 1.12.6 with Go 1.27.3 in the same offline CI matrix.
 - Node 24.18.0, as pinned in `.node-version`.
 - GCC/Clang and CGO for Go race checks.
 
@@ -25,6 +26,17 @@ CLI acceptance runs when Terraform is on PATH or `TF_ACC_TERRAFORM_PATH` points
 to an installed executable. Tests do not download Terraform. Without one, CLI
 cases explicitly skip. CI supplies the executable and runs the full suite with
 `go test -race` and CGO enabled.
+
+To run the same suite with OpenTofu 1.12.6:
+
+```sh
+TF_ACC_PROVIDER_HOST=registry.terraform.io \
+  TF_ACC_TERRAFORM_PATH="$(command -v tofu)" \
+  CGO_ENABLED=1 go test -race ./... -count=1 -timeout 10m
+```
+
+Keep the provider host aligned with the full source address in the examples.
+The OpenTofu CI job sets the executable path and host explicitly.
 
 All provider tests use loopback HTTP stubs and real SDK decoding. The test
 transport rejects non-loopback requests. `TF_ACC` alone never enables live

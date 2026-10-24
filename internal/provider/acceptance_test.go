@@ -29,7 +29,7 @@ func requireTerraform(t *testing.T) {
 		return
 	}
 	if _, err := exec.LookPath("terraform"); err != nil {
-		t.Skip("offline CLI acceptance requires Terraform >= 1.11 on PATH or TF_ACC_TERRAFORM_PATH; no binary is downloaded by tests")
+		t.Skip("offline CLI acceptance requires Terraform >= 1.11 on PATH or TF_ACC_TERRAFORM_PATH pointing to Terraform or OpenTofu; no binary is downloaded by tests")
 	}
 }
 func offlineFactories() map[string]func() (tfprotov6.ProviderServer, error) {
@@ -41,7 +41,7 @@ terraform {
   required_version = ">= 1.11.0"
   required_providers {
     hexcore = {
-      source = "2chevskii/hexcore"
+      source = "registry.terraform.io/2chevskii/hexcore"
     }
   }
 }
@@ -120,6 +120,20 @@ func TestOfflineAcceptanceStandard(t *testing.T) {
 			return nil
 		}},
 		{Config: offlineConfig(b, "tf-replaced", `size = "small"`, ""), ConfigPlanChecks: tfresource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("hexcore_vds.test", plancheck.ResourceActionDestroyBeforeCreate)}}, Check: tfresource.TestCheckResourceAttr("hexcore_vds.test", "name", "tf-replaced")},
+	}})
+}
+
+func TestOfflineAcceptanceMissingRegion(t *testing.T) {
+	requireTerraform(t)
+	b := newStub(t)
+	b.omitRegion = true
+	config := offlineConfig(b, "tf-offline", `size = "small"`, "")
+	checkRegion := tfresource.TestCheckResourceAttr("hexcore_vds.test", "region", "test-region")
+	tfresource.UnitTest(t, tfresource.TestCase{ProtoV6ProviderFactories: offlineFactories(), CheckDestroy: assertCleanStub(b), Steps: []tfresource.TestStep{
+		{Config: config, Check: checkRegion},
+		{RefreshState: true, Check: checkRegion},
+		{ResourceName: "hexcore_vds.test", ImportState: true, ImportStateIdFunc: importID(false), ImportStateVerify: true},
+		{Config: config, PlanOnly: true, ConfigPlanChecks: tfresource.ConfigPlanChecks{PostApplyPostRefresh: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}}, Check: checkRegion},
 	}})
 }
 

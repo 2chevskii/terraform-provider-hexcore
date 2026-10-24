@@ -55,6 +55,7 @@ type stubAPI struct {
 	uncertainDestroy                                                          bool
 	actionStatus                                                              hexcore.ActionStatus
 	regionAvailable                                                           bool
+	omitRegion                                                                bool
 }
 
 func str(s string) *string { return &s }
@@ -118,6 +119,9 @@ func (b *stubAPI) serveHTTP(w http.ResponseWriter, req *http.Request) {
 			}
 			items := []hexcore.VDS{}
 			for _, v := range b.servers {
+				if b.omitRegion {
+					v.Region = nil
+				}
 				items = append(items, v)
 			}
 			write(200, map[string]any{"vds": items})

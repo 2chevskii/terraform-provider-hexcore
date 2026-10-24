@@ -28,6 +28,7 @@ features:
 
 ::: info Release status
 The source is public; the provider has not been released to the Terraform Registry.
-Offline acceptance is covered. Live provider lifecycle verification remains pending.
+Offline acceptance and a live standard VDS lifecycle are verified.
+Custom VDS live acceptance remains pending.
 Read the [verification boundary](./guide/status) before planning live use.
 :::

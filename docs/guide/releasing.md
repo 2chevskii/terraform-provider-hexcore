@@ -13,9 +13,13 @@ no creation password is supplied. Record remaining limits without inferring
 provider readiness from the SDK's earlier live checks.
 
 The maintainer must choose the version and configure a dedicated release signing
-key. Store it as GitHub Actions secret `GPG_PRIVATE_KEY` and its passphrase as
-`PASSPHRASE`; never put signing material in the repository. Register the public
-signing key with the Terraform Registry when enrolling the provider.
+key. Store it as environment secret `GPG_PRIVATE_KEY` and its passphrase as
+`PASSPHRASE` in the GitHub Actions environment `terraform-registry`; never put
+signing material in the repository. The release job references that environment,
+which permits only tags matching `v*`. Replace the initial `PLACEHOLDER_...`
+values with real signing material before tagging a release; the workflow rejects
+empty or placeholder values. Register the public signing key with the Terraform
+Registry when enrolling the provider.
 
 ## Package validation
 

@@ -11,9 +11,10 @@ Discover catalogs and manage standard or custom VDS with explicit import metadat
 bounded waits and state retention on uncertain API outcomes.
 
 **Status:** public source and offline acceptance coverage. No Terraform Registry
-version has been released, and the provider lifecycle has not been verified
-against live HexCore. The intended source is `registry.terraform.io/2chevskii/hexcore`.
-Requires Terraform **>= 1.11**; OpenTofu compatibility is untested.
+version has been released. The standard VDS lifecycle was verified against live
+HexCore with OpenTofu 1.12.6; custom VDS live acceptance remains pending. The
+intended source is `registry.terraform.io/2chevskii/hexcore`.
+Requires Terraform **>= 1.11**; OpenTofu **1.12.6** is covered by the offline suite.
 
 ## Documentation
 
@@ -52,7 +53,7 @@ terraform {
   required_version = ">= 1.11.0"
   required_providers {
     hexcore = {
-      source = "2chevskii/hexcore"
+      source = "registry.terraform.io/2chevskii/hexcore"
     }
   }
 }
@@ -62,6 +63,8 @@ provider "hexcore" {}
 
 Explicit `token` overrides the environment. Empty or unknown configured values
 never fall back. `.env` files are not loaded and Configure makes no network calls.
+The full source address selects the same provider in Terraform and OpenTofu;
+OpenTofu otherwise resolves a short address through `registry.opentofu.org`.
 
 ## Development
 
@@ -82,8 +85,9 @@ it locally. Terraform must be on PATH for schema generation.
 Full offline CLI acceptance needs an installed Terraform executable on PATH or
 `TF_ACC_TERRAFORM_PATH`. Without one those cases explicitly skip. Tests never
 download Terraform and need no HexCore credentials. CI tests Go 1.26.10/Terraform
-1.11.4 and Go 1.27.3/Terraform 1.16.6, including CGO race checks, compiled-provider
-discovery, no-op plans after apply/import, and cleanup isolation. It also verifies
+1.11.4, Go 1.27.3/Terraform 1.16.6, and Go 1.27.3/OpenTofu 1.12.6, including
+CGO race checks, compiled-provider discovery, no-op plans after apply/import,
+and cleanup isolation. It also verifies
 generated docs, builds VitePress, checks reachable Go vulnerabilities, lints workflows
 and builds six release archives.
 
