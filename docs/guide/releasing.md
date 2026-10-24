@@ -13,12 +13,13 @@ no creation password is supplied. Record remaining limits without inferring
 provider readiness from the SDK's earlier live checks.
 
 The maintainer must choose the version and configure a dedicated release signing
-key. Store it as environment secret `GPG_PRIVATE_KEY` and its passphrase as
-`PASSPHRASE` in the GitHub Actions environment `terraform-registry`; never put
-signing material in the repository. The release job references that environment,
-which permits only tags matching `v*`. Replace the initial `PLACEHOLDER_...`
-values with real signing material before tagging a release; the workflow rejects
-empty or placeholder values. Register the public signing key with the Terraform
+key. The release key has no passphrase. Store its ASCII-armored private key as
+environment secret `GPG_PRIVATE_KEY` in the GitHub Actions environment
+`terraform-registry`; never put signing material in the repository. The release
+job references that environment, which permits tags matching `v*` and the exact
+`develop` branch for manual signing checks. Replace the initial `PLACEHOLDER_...`
+value before running it; the workflow rejects empty or placeholder keys.
+Register the public signing key with the Terraform
 Registry when enrolling the provider.
 
 ## Package validation
@@ -41,6 +42,13 @@ packaging configuration without signing or publishing:
 goreleaser check
 goreleaser release --snapshot --clean --skip=sign,publish --parallelism 2
 ```
+
+Before tagging, manually run **Signed provider release** on `develop` after its
+push CI passes. This imports the environment key and builds a signed snapshot
+without publishing. It verifies the checksum signature in a fresh GPG keyring,
+checks all six archives and the manifest, and uploads only those public artifacts
+and the public key for seven days. The workflow summary records the signing
+fingerprint; compare it with the key registered in Terraform Registry.
 
 ## Promote and publish
 
